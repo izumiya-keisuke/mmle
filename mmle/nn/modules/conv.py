@@ -32,15 +32,17 @@ class _BaseConv(BNModule):
         padding=1,
         dilation=1,
         groups=1,
-        bias=True,
+        bias=False,
         padding_mode="zeros",
         upscale=None,
         **kwargs,
     ):
         super().__init__(dim, c_out, **kwargs)
 
-        self.core = eval(f"nn.Conv{dim}d")(
-            c_in, c_out, kernel, stride, padding, dilation, groups, bias, padding_mode
+        self.set_core(
+            eval(f"nn.Conv{dim}d")(
+                c_in, c_out, kernel, stride, padding, dilation, groups, bias, padding_mode
+            )
         )
 
         self._upscale = mmle.id_fn

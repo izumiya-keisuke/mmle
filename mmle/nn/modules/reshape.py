@@ -21,4 +21,4 @@ class Reshape(Module):
     def __init__(self, *shape):
         super().__init__()
 
-        self.core = lambda x: x.reshape(*shape)
+        self.set_core(lambda x: x.reshape(*shape))

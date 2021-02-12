@@ -28,15 +28,10 @@ class Module(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self._core = mmle.id_fn
+        self.core = None
 
-    @property
-    def core(self):
-        return self._core
-
-    @core.setter
-    def core(self, core):
-        self._core = core
+    def set_core(self, core):
+        self.core = core
 
     def forward(self, x):
         return self.core(x)
@@ -48,15 +43,7 @@ class ActivModule(Module):
 
         if activ_kwargs is None:
             activ_kwargs = {}
-        self._activ = self._get_activ_fn(activ, **activ_kwargs)
-
-    @property
-    def activ(self):
-        return self._activ
-
-    @activ.setter
-    def activ(self, activ):
-        self._activ = activ
+        self.activ = self._get_activ_fn(activ, **activ_kwargs)
 
     def forward(self, x):
         return self.activ(self.core(x))
@@ -104,9 +91,8 @@ class ParamModule(ActivModule):
             init_bias_kwargs = {}
         self._init_bias_data = (how_init_bias, init_bias_kwargs)
 
-    @core.setter
-    def core(self, core):
-        self._core = core
+    def set_core(self, core):
+        self.core = core
         self._init_param()
 
     def _init_param(self):
@@ -138,19 +124,11 @@ class BNModule(ParamModule):
 
         if bn:
             if dim in (1, 2, 3):
-                self._bn = eval(f"nn.BatchNorm{dim}d")(num_features)
+                self.bn = eval(f"nn.BatchNorm{dim}d")(num_features)
             else:
                 raise ValueError(f"dim must be 1, 2 or 3, but got {dim}.")
         else:
-            self._bn = mmle.id_fn
-
-    @property
-    def bn(self):
-        return self._bn
-
-    @bn.setter
-    def bn(self, bn):
-        self._bn = bn
+            self.bn = mmle.id_fn
 
     def forward(self, x):
         return self.activ(self.bn(self.core(x)))

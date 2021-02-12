@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mmle"
 version = "1.0.0"
-description = "Helper for machine learning"
+description = "Helper for machine learning with PyTorch"
 authors = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
 maintainers = ["Keisuke Izumiya <izumiya.keisuke.24@gmail.com>"]
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ readme = "README.rst"
 repository = "https://github.com/izumiya-keisuke/mmle"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 
 tensorboard = "^2.4.1"
 
@@ -30,7 +30,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.black]
 line-length = 100
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py37', 'py38']
 include = '\.pyi?$'
 exclude = '''
 /(

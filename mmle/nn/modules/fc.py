@@ -20,7 +20,7 @@ from .module import BNModule
 
 
 class FC(BNModule):
-    def __init__(self, n_in, n_out, bias=True, **kwargs):
+    def __init__(self, n_in, n_out, bias=False, **kwargs):
         super().__init__(1, n_out, **kwargs)
 
-        self.core = nn.Linear(n_in, n_out, bias)
+        self.set_core(nn.Linear(n_in, n_out, bias))

@@ -22,8 +22,8 @@ import torch.distributed as distd  # pylint: disable=E0401
 import torch.nn as nn  # pylint: disable=E0401
 import torch.nn.functional as F  # pylint: disable=E0401
 import torch.optim as optim  # pylint: disable=E0401
-from torch.nn.data.distributed import DistributedSampler  # pylint: disable=E0401
 from torch.utils.data import DataLoader  # pylint: disable=E0401
+from torch.utils.data.distributed import DistributedSampler  # pylint: disable=E0401
 
 
 BATCH_SIZE = 400
@@ -54,7 +54,7 @@ def main():
     rank = distd.get_rank()
 
     model = nn.Sequential(
-        mnn.FC(DATA_DIM, MIDDLE_DIM), mnn.FC(MIDDLE_DIM, LABEL_DIM, bn=False, activ="id")
+        mnn.FC(DATA_DIM, MIDDLE_DIM), mnn.FC(MIDDLE_DIM, LABEL_DIM, bias=True, bn=False, activ="id")
     )
     model = mdistd.distribute_module(model)
 
@@ -65,14 +65,11 @@ def main():
     loader = DataLoader(dataset, BATCH_SIZE, sampler=sampler, drop_last=True)
 
     if rank == 0:
-        manager = mut.Manager(model, optimizer, log_dir=mut.make_time_dir(LOG_DIR))
+        manager = mut.Manager(model, optimizer, log_dir=mut.get_time_dir(LOG_DIR))
         manager.add_graph(dataset[0][0].repeat(BATCH_SIZE, 1))
         step = 0
 
     for epoch in mut.range1(EPOCH_NUM):
-        if rank == 0:
-            print(f"Epoch {epoch}")
-
         model.train()
         for data, label in loader:
             loss = F.mse_loss(model(data), label.to(rank))
@@ -87,6 +84,7 @@ def main():
                 manager.plot("loss", "train", loss.item(), step)
 
         if rank == 0:
+            print(f"Finish epoch {epoch}: loss={loss.item():.3f}")
             params_dict = manager.get_params_dict()
             manager.save(step=step, **params_dict)
         distd.barrier()
